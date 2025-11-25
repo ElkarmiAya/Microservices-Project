@@ -2,7 +2,7 @@ name: CI - Build & Push Docker Images
 
 on:
   push:
-  
+
     branches: [ Main ]
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
 
     - name: Build & Push api-gateway
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest ./api-gateway
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest ./api-gatway
         docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
 
     - name: Build & Push order-service
