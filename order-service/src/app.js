@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const sequelize = require('./config/database');
 const orderRoutes = require('./routes/order.routes');
+const { register, metricsMiddleware } = require('./middleware/metrics');
 
 const app = express();
 const PORT = process.env.PORT || 8001;
@@ -12,6 +13,40 @@ const PORT = process.env.PORT || 8001;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ✅ Ajouter le middleware de métriques
+app.use(metricsMiddleware);
+
+// ✅ Endpoint /health
+app.get('/health', async (req, res) => {
+  try {
+    // Vérifier la connexion à la base de données
+    await sequelize.authenticate();
+    
+    res.status(200).json({
+      status: 'healthy',
+      service: 'order-service',
+      timestamp: new Date().toISOString(),
+      checks: {
+        database: 'connected',
+        uptime: process.uptime()
+      }
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'unhealthy',
+      service: 'order-service',
+      timestamp: new Date().toISOString(),
+      error: error.message
+    });
+  }
+});
+
+// ✅ Endpoint /metrics (format Prometheus)
+app.get('/api/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
 
 // Routes
 app.get('/', (req, res) => {
@@ -30,12 +65,18 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`🚀 Order Service démarré sur http://localhost:${PORT}`);
       console.log(`📊 API disponible sur http://localhost:${PORT}/api`);
+      console.log(`📊 Métriques disponibles sur http://localhost:${PORT}/metrics`);
+      console.log(`💚 Health check disponible sur http://localhost:${PORT}/health`);
     });
   } catch (error) {
     console.error('❌ Erreur lors du démarrage:', error);
     process.exit(1);
   }
 };
+
+
+
+
 
 startServer();
 

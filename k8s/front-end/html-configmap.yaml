@@ -1,0 +1,474 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-html-files
+  namespace: microservices
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Système de Gestion des Commandes</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>🛒 Système de Gestion des Commandes</h1>
+                <div class="health-status">
+                    <span id="health-status">Vérification...</span>
+                </div>
+            </header>
+
+            <!-- Section Inventaire -->
+            <section class="card">
+                <h2>📦 Inventaire</h2>
+                
+                <div class="form-group">
+                    <h3>Ajouter un produit</h3>
+                    <form id="add-item-form">
+                        <input type="text" id="item-name" placeholder="Nom du produit" required>
+                        <input type="number" id="item-quantity" placeholder="Quantité" required min="1">
+                        <input type="number" id="item-price" placeholder="Prix (MAD)" required min="0" step="0.01">
+                        <button type="submit">Ajouter</button>
+                    </form>
+                </div>
+
+                <div class="items-list">
+                    <h3>Produits disponibles</h3>
+                    <button id="refresh-inventory" class="btn-secondary">🔄 Actualiser</button>
+                    <div id="inventory-list" class="loading">Chargement...</div>
+                </div>
+            </section>
+
+            <!-- Section Commandes -->
+            <section class="card">
+                <h2>🛍️ Commandes</h2>
+                
+                <div class="form-group">
+                    <h3>Créer une commande</h3>
+                    <form id="create-order-form">
+                        <select id="order-item-id" required>
+                            <option value="">Sélectionner un produit</option>
+                        </select>
+                        <input type="number" id="order-quantity" placeholder="Quantité" required min="1">
+                        <input type="text" id="customer-name" placeholder="Nom du client" required>
+                        <input type="email" id="customer-email" placeholder="Email du client" required>
+                        <button type="submit">Commander</button>
+                    </form>
+                </div>
+
+                <div class="orders-list">
+                    <h3>Historique des commandes</h3>
+                    <button id="refresh-orders" class="btn-secondary">🔄 Actualiser</button>
+                    <div id="orders-list" class="loading">Chargement...</div>
+                </div>
+            </section>
+
+            <!-- Section Statistiques -->
+            <section class="card">
+                <h2>📊 Statistiques</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Produits</h3>
+                        <p id="stat-products" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Commandes</h3>
+                        <p id="stat-orders" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Revenus Total</h3>
+                        <p id="stat-revenue" class="stat-value">-</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="toast"></div>
+
+        <script src="app.js"></script>
+    </body>
+    </html>
+
+  style.css: |
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    header {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    header h1 {
+        color: #667eea;
+        font-size: 2em;
+    }
+
+    .health-status {
+        padding: 10px 20px;
+        background: #e8f5e9;
+        border-radius: 25px;
+        color: #2e7d32;
+        font-weight: bold;
+    }
+
+    .health-status.error {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card h2 {
+        color: #667eea;
+        margin-bottom: 20px;
+        font-size: 1.8em;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 10px;
+    }
+
+    form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    input, select {
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1em;
+        transition: border 0.3s;
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    button {
+        padding: 12px 25px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: #ff6b6b;
+        margin-bottom: 15px;
+    }
+
+    .btn-secondary:hover {
+        background: #ee5a52;
+    }
+
+    .item-card, .order-card {
+        background: #f9f9f9;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        border-left: 5px solid #667eea;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .price {
+        color: #2e7d32;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+
+    .status {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+
+    .status.confirmed {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 30px;
+        border-radius: 15px;
+        color: white;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: white;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+        font-style: italic;
+    }
+
+    .toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        padding: 20px 30px;
+        background: #323232;
+        color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        transform: translateY(200px);
+        transition: transform 0.3s;
+        z-index: 1000;
+    }
+
+    .toast.show {
+        transform: translateY(0);
+    }
+
+    .toast.success {
+        background: #2e7d32;
+    }
+
+    .toast.error {
+        background: #c62828;
+    }
+
+  app.js: |
+    // Configuration de l'API Gateway
+    const API_BASE_URL = window.location.origin.replace(':3000', '') + '/api';
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => { toast.className = 'toast'; }, 3000);
+    }
+
+    function formatPrice(price) {
+        return new Intl.NumberFormat('fr-MA', {
+            style: 'currency',
+            currency: 'MAD'
+        }).format(price);
+    }
+
+    async function checkHealth() {
+        const statusElement = document.getElementById('health-status');
+        try {
+            const response = await fetch(`${API_BASE_URL}/orders/health`);
+            if (response.ok) {
+                statusElement.textContent = '✅ Services actifs';
+                statusElement.className = 'health-status';
+            } else {
+                throw new Error('Service unavailable');
+            }
+        } catch (error) {
+            statusElement.textContent = '❌ Services indisponibles';
+            statusElement.className = 'health-status error';
+        }
+    }
+
+    async function loadInventory() {
+        const inventoryList = document.getElementById('inventory-list');
+        const itemSelect = document.getElementById('order-item-id');
+        inventoryList.innerHTML = '<div class="loading">Chargement...</div>';
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/orders/items`);
+            const data = await response.json();
+            const items = data.data || data;
+            
+            if (items.length === 0) {
+                inventoryList.innerHTML = '<div class="empty">Aucun produit</div>';
+                return;
+            }
+            
+            inventoryList.innerHTML = items.map(item => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        <p>Stock: <strong>${item.quantity}</strong></p>
+                        <p class="price">${formatPrice(item.price)}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            itemSelect.innerHTML = '<option value="">Sélectionner</option>' +
+                items.map(item => `<option value="${item.id}">${item.name} - ${formatPrice(item.price)}</option>`).join('');
+        } catch (error) {
+            inventoryList.innerHTML = `<div class="empty">Erreur: ${error.message}</div>`;
+        }
+    }
+
+    async function addItem(event) {
+        event.preventDefault();
+        const name = document.getElementById('item-name').value;
+        const quantity = parseInt(document.getElementById('item-quantity').value);
+        const price = parseFloat(document.getElementById('item-price').value);
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/inventory/items`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, quantity, price })
+            });
+            
+            if (!response.ok) throw new Error('Erreur');
+            showToast('Produit ajouté!', 'success');
+            event.target.reset();
+            loadInventory();
+        } catch (error) {
+            showToast('Erreur', 'error');
+        }
+    }
+
+    async function loadOrders() {
+        const ordersList = document.getElementById('orders-list');
+        ordersList.innerHTML = '<div class="loading">Chargement...</div>';
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/orders/orders`);
+            const data = await response.json();
+            const orders = data.data || data;
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<div class="empty">Aucune commande</div>';
+                return;
+            }
+            
+            ordersList.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-info">
+                        <h4>Commande #${order.id}</h4>
+                        <p>${order.item_name} × ${order.quantity}</p>
+                        <p>Client: ${order.customer_name}</p>
+                        <p class="price">${formatPrice(order.total_price)}</p>
+                    </div>
+                    <span class="status ${order.status}">${order.status}</span>
+                </div>
+            `).join('');
+            
+            updateStats();
+        } catch (error) {
+            ordersList.innerHTML = `<div class="empty">Erreur</div>`;
+        }
+    }
+
+    async function createOrder(event) {
+        event.preventDefault();
+        const item_id = parseInt(document.getElementById('order-item-id').value);
+        const quantity = parseInt(document.getElementById('order-quantity').value);
+        const customer_name = document.getElementById('customer-name').value;
+        const customer_email = document.getElementById('customer-email').value;
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/orders/orders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_id, quantity, customer_name, customer_email })
+            });
+            
+            if (!response.ok) throw new Error('Erreur');
+            showToast('Commande créée!', 'success');
+            event.target.reset();
+            loadOrders();
+            loadInventory();
+        } catch (error) {
+            showToast('Erreur', 'error');
+        }
+    }
+
+    async function updateStats() {
+        try {
+            const [itemsRes, ordersRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/orders/items`),
+                fetch(`${API_BASE_URL}/orders/orders`)
+            ]);
+            
+            const items = await itemsRes.json();
+            const orders = await ordersRes.json();
+            
+            const itemsData = items.data || items;
+            const ordersData = orders.data || orders;
+            
+            document.getElementById('stat-products').textContent = itemsData.length;
+            document.getElementById('stat-orders').textContent = ordersData.length;
+            
+            const revenue = ordersData.reduce((sum, o) => sum + parseFloat(o.total_price || 0), 0);
+            document.getElementById('stat-revenue').textContent = formatPrice(revenue);
+        } catch (error) {
+            console.error('Erreur stats:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        checkHealth();
+        loadInventory();
+        loadOrders();
+        setInterval(checkHealth, 30000);
+        
+        document.getElementById('add-item-form').addEventListener('submit', addItem);
+        document.getElementById('create-order-form').addEventListener('submit', createOrder);
+        document.getElementById('refresh-inventory').addEventListener('click', loadInventory);
+        document.getElementById('refresh-orders').addEventListener('click', loadOrders);
+    });

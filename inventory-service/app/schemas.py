@@ -4,19 +4,22 @@
 # 2- Séparer les données internes et externes
 ####### Les models.py (SQLAlchemy) représentent la structure réelle de la base de données.
 ####### Les schemas.py représentent les données que l’API envoie ou reçoit. 
-from pydantic import BaseModel, ConfigDict
+from pydantic import  BaseModel, ConfigDict, Field
 from typing import Optional
 
 # Pour créer un nouvel item
 class InventoryItemCreate(BaseModel):
     name: str
     quantity: int
+    price: float = Field(..., gt=0, description="Prix unitaire de l'item")  # ✅ NOUVEAU
+
 
 # Pour renvoyer un item à l'utilisateur
 class InventoryItemResponse(BaseModel):
     id: int
     name: str
     quantity: int
+    price: float  # ✅ NOUVEAU
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -34,3 +37,4 @@ class QuantityIncrement(BaseModel):
 class InventoryItemUpdate(BaseModel):
     name: Optional[str] = None
     quantity: Optional[int] = None
+    price: Optional[float] = Field(None, gt=0, description="Prix unitaire")  # ✅ NOUVEAU 
