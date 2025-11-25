@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: inventory-service
-        image: <YOUR_DOCKERHUB_USERNAME>/inventory-service:latest
+        image: elkarmiaya/inventory-service:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

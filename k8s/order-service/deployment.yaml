@@ -40,11 +40,11 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8001"
-        prometheus.io/path: "/api/metrics"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
       - name: order-service
-        image: <YOUR_DOCKERHUB_USERNAME>/order-service:latest
+        image: elkarmiaya/order-service:latest  # ✅ Changez ici
         imagePullPolicy: Always
         ports:
         - containerPort: 8001

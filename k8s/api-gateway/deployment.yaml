@@ -16,15 +16,12 @@ spec:
         app: api-gateway
     spec:
       containers:
-      - name: nginx
-        image: nginx:alpine
+      - name: api-gateway
+        image: elkarmiaya/api-gateway:latest  # ✅ Votre image
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
           name: http
-        volumeMounts:
-        - name: nginx-config
-          mountPath: /etc/nginx/nginx.conf
-          subPath: nginx.conf
         resources:
           requests:
             memory: "128Mi"
@@ -44,10 +41,6 @@ spec:
             port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
-      volumes:
-      - name: nginx-config
-        configMap:
-          name: nginx-config
 ---
 apiVersion: v1
 kind: Service
