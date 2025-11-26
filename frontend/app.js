@@ -1,5 +1,5 @@
 // Configuration de l'API Gateway
-const API_BASE_URL = 'http://api-gateway/api';
+const API_BASE_URL = '/api';
 
 // Utilitaires
 function showToast(message, type = 'success') {
