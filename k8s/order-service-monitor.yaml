@@ -14,5 +14,5 @@ spec:
       - microservices
   endpoints:
     - port: http
-      path: /metrics
+      path: /api/metrics
       interval: 15s
