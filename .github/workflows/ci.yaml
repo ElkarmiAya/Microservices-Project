@@ -11,8 +11,9 @@ jobs:
     steps:
 
     # ----- 1. Checkout du code -----
-    - name: Checkout
+    - name: Checkout repository
       uses: actions/checkout@v3
+
 
     # ----- 2. Login Docker Hub -----
     - name: Login to Docker Hub
@@ -21,58 +22,74 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # ----- 3. Installation Trivy -----
-    - name: Install Trivy
-      run: |
-        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
 
-    # ----- 4. Build + Scan + Push API Gateway -----
+    # ---------------------------------------------------------
+    # API GATEWAY
+    # ---------------------------------------------------------
+
     - name: Build api-gateway
-      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest ./api-gatway
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest ./api-gateway
 
-    - name: Security scan api-gateway
-      run: |
-        trivy image --exit-code 1 --severity CRITICAL,HIGH \
-        ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+    - name: Scan api-gateway (Trivy)
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: "${{ secrets.DOCKER_USERNAME }}/api-gateway:latest"
+        severity: "CRITICAL,HIGH"
+        exit-code: "1"
 
     - name: Push api-gateway
       run: docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
 
 
-    # ----- 5. Build + Scan + Push Order-Service -----
+    # ---------------------------------------------------------
+    # ORDER SERVICE
+    # ---------------------------------------------------------
+
     - name: Build order-service
       run: docker build -t ${{ secrets.DOCKER_USERNAME }}/order-service:latest ./order-service
 
-    - name: Security scan order-service
-      run: |
-        trivy image --exit-code 1 --severity CRITICAL,HIGH \
-        ${{ secrets.DOCKER_USERNAME }}/order-service:latest
+    - name: Scan order-service (Trivy)
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: "${{ secrets.DOCKER_USERNAME }}/order-service:latest"
+        severity: "CRITICAL,HIGH"
+        exit-code: "1"
 
     - name: Push order-service
       run: docker push ${{ secrets.DOCKER_USERNAME }}/order-service:latest
 
 
-    # ----- 6. Build + Scan + Push Inventory-Service -----
+    # ---------------------------------------------------------
+    # INVENTORY SERVICE
+    # ---------------------------------------------------------
+
     - name: Build inventory-service
       run: docker build -t ${{ secrets.DOCKER_USERNAME }}/inventory-service:latest ./inventory-service
 
-    - name: Security scan inventory-service
-      run: |
-        trivy image --exit-code 1 --severity CRITICAL,HIGH \
-        ${{ secrets.DOCKER_USERNAME }}/inventory-service:latest
+    - name: Scan inventory-service (Trivy)
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: "${{ secrets.DOCKER_USERNAME }}/inventory-service:latest"
+        severity: "CRITICAL,HIGH"
+        exit-code: "1"
 
     - name: Push inventory-service
       run: docker push ${{ secrets.DOCKER_USERNAME }}/inventory-service:latest
 
 
-    # ----- 7. Build + Scan + Push Frontend -----
+    # ---------------------------------------------------------
+    # FRONTEND
+    # ---------------------------------------------------------
+
     - name: Build frontend
       run: docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
 
-    - name: Security scan frontend
-      run: |
-        trivy image --exit-code 1 --severity CRITICAL,HIGH \
-        ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+    - name: Scan frontend (Trivy)
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: "${{ secrets.DOCKER_USERNAME }}/frontend:latest"
+        severity: "CRITICAL,HIGH"
+        exit-code: "1"
 
     - name: Push frontend
       run: docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
