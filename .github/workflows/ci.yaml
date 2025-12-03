@@ -28,7 +28,7 @@ jobs:
     # ---------------------------------------------------------
 
     - name: Build api-gateway
-      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest ./api-gateway
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest ./api-gatway
 
     - name: Scan api-gateway (Trivy)
       uses: aquasecurity/trivy-action@master
