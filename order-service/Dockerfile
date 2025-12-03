@@ -1,5 +1,5 @@
 # Choisir l image de base
-FROM node:18-alpine
+FROM node:24-bookworm-slim
 # definir le repertoire de travail 
 WORKDIR /app 
 # coupier les fichier  necessaire 
