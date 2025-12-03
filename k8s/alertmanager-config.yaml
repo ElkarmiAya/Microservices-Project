@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+  labels:
+    app: kube-prometheus-stack-alertmanager
+data:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: 'sandbox.smtp.mailtrap.io:2525'      # serveur SMTP
+      smtp_from: 'alert@alertmanager.com'         # email de l’expéditeur
+      smtp_auth_username: 'f46d6cbdf73c43'
+      smtp_auth_password: '068f1c35d581da'   # mot de passe ou app password
+      smtp_require_tls: true
+
+    route:
+      group_by: ['alertname', 'service']
+      group_wait: 10s
+      group_interval: 10m
+      repeat_interval: 1h
+      receiver: 'email-receiver'
+
+    receivers:
+    - name: 'email-receiver'
+      email_configs:
+      - to: 'elkarmiaya@gmail.com'  # email qui reçoit l’alerte
+        send_resolved: true
